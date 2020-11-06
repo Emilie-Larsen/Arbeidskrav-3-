@@ -10,9 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, Echo=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 ### Last ned pakker #####
+
 library(tidyverse)
 library(broom)
 library(kableExtra)
@@ -26,7 +27,7 @@ var_interest <- c("CLUSTER", "AVG_CSA_T1")
 dat1 <- hypertrophy %>%
   select(all_of(var_interest)) %>%
   mutate(CLUSTER = factor(CLUSTER, levels = c("LOW", "HIGH"))) %>%
-  drop_na(CLUSTER, AVG_CSA_T1) %>%
+  drop_na(CLUSTER, AVG_CSA_T1)
  
 
 
@@ -53,7 +54,7 @@ tidy(ttest) %>%
 
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
 ### Regression model ######
 
@@ -67,36 +68,34 @@ tidy(regmod) %>%
 
 ```
 
-```{r Regresjonsanalyse DEL 2}
+## DEL 2 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE} 
+
+
 ## Regresjonsanalyse 
 
 dat <- read_csv("./data/hypertrophy-kopi.csv") %>%
-  select("SUB_ID", "Squat_3RM_kg", "AVG_CSA_T1") %>%
-  print()
+  select("SUB_ID", "Squat_3RM_kg", "AVG_CSA_T1", "T1_BODY_MASS")
 
-##### correlation coefficient from two variables:
-## Spiller ingen rekkefølge hvordan man tar tallen blir det samme.
 
-cor(dat$Squat_3RM_kg, dat$AVG_CSA_T1)
 
-cor(dat$AVG_CSA_T1, dat$Squat_3RM_kg)
-
-cor.test(dat$AVG_CSA_T1, dat$Squat_3RM_kg)
 
 
 ```
 
 
-```{r}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 
-### FIGUR 
+### FIGUR ### Skal denne være med? 
 dat %>%
-  ggplot(aes(Squat_3RM_kg,AVG_CSA_T1 )) + geom_point() + theme_minimal()
+  ggplot(aes(Squat_3RM_kg,AVG_CSA_T1 )) + geom_point() + theme_minimal() + 
+geom_smooth(se = FALSE, method = "lm")
 
 # Store the correlation analysis in an object 
 c <- cor.test(dat$AVG_CSA_T1, dat$Squat_3RM_kg)
 # store the regression model
-rm <- lm(AVG_CSA_T1  ~ Squat_3RM_kg, data = dat)
+rm <- lm(Squat_3RM_kg ~ AVG_CSA_T1 + T1_BODY_MASS data = dat)
 
 # Display the p-value for the regression coefficient
 coef(summary(rm))[2, 4] 
@@ -108,5 +107,28 @@ summary(rm)$r.squared
 c$estimate^2
 
 confint(rm)
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+
+### Tabell 
+dat %>%
+  ggplot(aes(rank(AVG_CSA_T1),
+             rank(Squat_3RM_kg))) + geom_point() + theme_minimal() +
+geom_smooth(se = FALSE, method = "lm")
+
+
+#### at tallene er normalt fordelt 
+
+cor.test(rank(dat$AVG_CSA_T1), rank(dat$Squat_3RM_kg), method = "pearson")
+
+#### SKAl vi ha med rank eller ikke?? 
+
+
+## en person med høy kroppsvekt løfter mere, sjekke med kroppsvekt 
 ```
 
